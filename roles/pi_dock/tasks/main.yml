@@ -1,0 +1,146 @@
+---
+
+- name: Add build-essential packages
+  apt:
+    name: build-essential
+    state: present
+
+- name: Add python-dev packages
+  apt:
+    name: python-dev
+    state: present
+
+- name: Add python-openssl packages
+  apt:
+    name: python-openssl
+    state: present
+
+- name: Add python-smbus packages
+  apt:
+    name: python-smbus 
+    state: present
+
+- name: Add i2c-tools packages
+  apt:
+    name: i2c-tools
+    state: present
+
+- name: Add bc package for maths
+  apt:
+    name: bc
+    state: present
+
+- name: Add curl package
+  apt:
+    name: curl
+    state: present
+
+- name: configure 1wire in pi boot file /boot/config.txt
+  lineinfile :
+    dest: /boot/config.txt
+    line: "dtoverlay=w1-gpio"
+    insertafter: EOF
+    state: present
+  become: true
+
+- name: configure i2c1 in pi boot file /boot/config.txt
+  lineinfile :
+    dest: /boot/config.txt
+    line: "dtparam=i2c1=on"
+    insertafter: EOF
+    state: present
+  become: true
+
+- name: configure i2c_arm in pi boot file /boot/config.txt
+  lineinfile :
+    dest: /boot/config.txt
+    line: "dtparam=i2c_arm=on"
+    insertafter: EOF
+    state: present
+  become: true
+
+- name: configure i2c-bcm2708 in /etc/modules
+  lineinfile :
+    dest: /etc/modules
+    line: "i2c-bcm2708"
+    insertafter: EOF
+    state: present
+  become: true
+
+- name: configure i2c-dev in /etc/modules
+  lineinfile :
+    dest: /etc/modules
+    line: "i2c-dev"
+    insertafter: EOF
+    state: present
+  become: true
+
+- name: create directory for scripts
+  file:
+    path: "{{ install_path }}"
+    state: directory
+
+- name: git clone https://github.com/adafruit/Adafruit_Python_DHT.git
+  git:
+    repo: 'https://github.com/adafruit/Adafruit_Python_DHT.git'
+    dest: "{{ install_path }}Adafruit_Python_DHT/"
+    force: true
+
+- name: sudo python setup.py install for DHT
+  shell: "/usr/bin/python {{ install_path }}Adafruit_Python_DHT/setup.py install"
+  args:
+    chdir: "{{ install_path }}Adafruit_Python_DHT/"
+  become: true
+
+- name: git clone https://github.com/adafruit/Adafruit_Python_BMP.git 
+  git:
+    repo: 'https://github.com/adafruit/Adafruit_Python_BMP.git'
+    dest: "{{ install_path }}Adafruit_Python_BMP/"
+    force: true
+
+- name: sudo python setup.py install for BMP
+  shell: "/usr/bin/python {{ install_path }}Adafruit_Python_BMP/setup.py install"
+  args:
+    chdir: "{{ install_path }}Adafruit_Python_BMP/"
+  become: true
+
+- name: change permissions on BMP sample script
+  file:
+    path: "{{ install_path }}Adafruit_Python_BMP/examples/simpletest.py"
+    mode: 0744
+
+- name: copy range finder script from template
+  # Script credits belong to https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
+  template:
+    src: range_sensor.py.j2
+    dest: "{{ install_path }}range_sensor.py"
+    mode: 0744
+    owner: pi
+    group: pi
+
+- name: copy script from template
+  template:
+    src: pi_dock.sh.j2
+    dest: "{{ install_path }}pi_dock.sh"
+    mode: 0744
+    owner: pi
+    group: pi
+
+- name: configure cron job
+  cron:
+    name: "poll sensor data"
+    minute: "*/1"
+    state: present
+    job: "{{ install_path }}pi_dock.sh >/dev/null 2>&1"
+
+  # this is a ansible 2.2 feature
+  #- name: enable cron daemon in systemd
+  #systemd:
+  #  name: cron
+  #  enabled: yes
+  #  state: started
+  #become: true
+
+- name: enable systemd cron the old way
+  shell: systemctl enable cron
+  become: true

@@ -1,0 +1,14 @@
+---
+range_trig_pin : 23
+range_echo_pin : 24
+ada_2302_pin : 17
+dev_1wire1_sensor : 28-0316838f20bf
+dev_1wire2_sensor : 28-0415852c67ff
+influxdb_protocol: http
+influxdb_server : 192.168.1.5
+influxdb_port: 8086
+influxdb_db : sensors
+install_path : /home/pi/dock_pi/
+sensor_elevation : 222.22
+latitude : na
+longitude : na

@@ -1,0 +1,5 @@
+- hosts: dock-pi
+  gather_facts: yes
+  user: pi
+  roles:
+    - { role : pi_dock }
