@@ -1,78 +1,32 @@
 ---
 
-- name: Add build-essential packages
-  apt:
-    name: build-essential
-    state: present
-
-- name: Add python-dev packages
-  apt:
-    name: python-dev
-    state: present
-
-- name: Add python-openssl packages
-  apt:
-    name: python-openssl
-    state: present
-
-- name: Add python-smbus packages
-  apt:
-    name: python-smbus 
-    state: present
-
-- name: Add i2c-tools packages
-  apt:
-    name: i2c-tools
-    state: present
-
-- name: Add bc package for maths
-  apt:
-    name: bc
-    state: present
-
-- name: Add curl package
-  apt:
-    name: curl
-    state: present
-
-- name: configure 1wire in pi boot file /boot/config.txt
-  lineinfile :
-    dest: /boot/config.txt
-    line: "dtoverlay=w1-gpio"
-    insertafter: EOF
-    state: present
+- name: Install required packages
+  package:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - build-essential
+    - python-dev
+    - python-openssl
+    - python-smbus
+    - i2c-tools
+    - bc
+    - curl
   become: true
 
-- name: configure i2c1 in pi boot file /boot/config.txt
+- name: configure /boot/config.txt and /etc/modules
   lineinfile :
-    dest: /boot/config.txt
-    line: "dtparam=i2c1=on"
-    insertafter: EOF
-    state: present
-  become: true
-
-- name: configure i2c_arm in pi boot file /boot/config.txt
-  lineinfile :
-    dest: /boot/config.txt
-    line: "dtparam=i2c_arm=on"
-    insertafter: EOF
-    state: present
-  become: true
-
-- name: configure i2c-bcm2708 in /etc/modules
-  lineinfile :
-    dest: /etc/modules
-    line: "i2c-bcm2708"
-    insertafter: EOF
-    state: present
-  become: true
-
-- name: configure i2c-dev in /etc/modules
-  lineinfile :
-    dest: /etc/modules
-    line: "i2c-dev"
-    insertafter: EOF
-    state: present
+    dest: "{{ item.dest }}" 
+    line: "{{ item.line }}"
+    insertafter: "{{ item.insertafter }}"
+    state: "{{ item.state }}"
+    backup: yes
+  with_items:
+          - { dest: '/boot/config.txt', line: "dtoverlay=w1-gpio", insertafter: 'EOF', state: 'present' }
+          - { dest: '/boot/config.txt', line: "dtparam=i2c1=on", insertafter: 'EOF', state: 'present' }
+          - { dest: '/boot/config.txt', line: "dtparam=i2c_arm=on", insertafter: 'EOF', state: 'present' }
+          - { dest: '/etc/modules', line: "i2c-bcm2708", insertafter: 'EOF', state: 'present' }
+          - { dest: '/etc/modules', line: "i2c-dev", insertafter: 'EOF', state: 'present' }
   become: true
 
 - name: create directory for scripts
@@ -110,21 +64,16 @@
     mode: 0744
 
 - name: copy range finder script from template
-  # Script credits belong to https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
+  # Range finder script credits belong to https://www.modmypi.com/blog/hc-sr04-ultrasonic-range-sensor-on-the-raspberry-pi
   template:
-    src: range_sensor.py.j2
-    dest: "{{ install_path }}range_sensor.py"
+    src: "{{ item.src }}" 
+    dest: "{{ install_path }}{{ item.dest }}"
     mode: 0744
     owner: pi
     group: pi
-
-- name: copy script from template
-  template:
-    src: pi_dock.sh.j2
-    dest: "{{ install_path }}pi_dock.sh"
-    mode: 0744
-    owner: pi
-    group: pi
+  with_items:
+    - { src: 'range_sensor.py.j2', dest: 'range_sensor.py' }
+    - { src: 'pi_dock.sh.j2', dest: 'pi_dock.sh' }
 
 - name: configure cron job
   cron:
