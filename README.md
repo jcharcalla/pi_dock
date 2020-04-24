@@ -18,7 +18,7 @@ This playbook will install all required packages and scripts.
 
 
 ```
-$ ansible-playbook -i pi-dock.charcalla.com, pi_dock.yml -k -K -u ubuntu
+$ ansible-playbook -i <Hostname or IP>, pi_dock.yml -k -K -u ubuntu
 SSH password:
 SUDO password[defaults to SSH password]:
 
