@@ -1,0 +1,31 @@
+---
+
+- name: Copy pi_dock_sensors.sh script
+  copy:
+    src: pi_dock_sensors.sh
+    dest: /usr/local/bin/pi_dock_sensors.sh
+    owner: "{{ pi_dock_sensors.user }}"
+    group: "{{ pi_dock_sensors.group }}"
+    mode: '0744'
+  become: true
+  notify: Restart dock Exporter
+
+- name: Copy pi_dock_sensors systemd unit file template
+  template:
+    src: pi_dock_sensors.service.j2
+    dest: /etc/systemd/system/pi_dock_sensors.service
+    owner: "{{ pi_dock_sensors.user }}"
+    group: "{{ pi_dock_sensors.group }}"
+    mode: 0644
+  become: yes
+  notify: Restart dock Exporter
+
+- name: Copy pi_dock_sensors systemd config file template
+  template:
+    src: pi_dock_sensors.options.j2
+    dest: /etc/default/pi_dock_sensors
+    owner: "{{ pi_dock_sensors.user }}"
+    group: "{{ pi_dock_sensors.group }}"
+    mode: 0644
+  become: yes
+  notify: Restart dock Exporter

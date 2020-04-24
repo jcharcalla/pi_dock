@@ -8,7 +8,7 @@ influxdb_protocol: http
 influxdb_server : 192.168.1.5
 influxdb_port: 8086
 influxdb_db : sensors
-install_path : /home/pi/pi_dock/
+install_path : /home/ubuntu/pi_dock/
 sensor_elevation : 222.22
 latitude : na
 longitude : na

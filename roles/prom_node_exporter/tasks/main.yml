@@ -1,0 +1,53 @@
+---
+
+# This will need more work around version control and others.
+# Just meant to provide basic functionality now
+#
+# todo:
+# - Register fact with version
+# - trigger some tasks based on fact and version number
+
+- name: Download and untar prometheus node_exporter
+  unarchive:
+    src: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter.version }}/node_exporter-{{ node_exporter.version }}.linux-{{ node_exporter.arch }}.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copy node exporter to permanent location
+  copy:
+    src: /tmp/node_exporter-{{ node_exporter.version }}.linux-arm64/node_exporter
+    dest: /usr/local/bin/node_exporter
+    owner: "{{ node_exporter.user }}"
+    group: "{{ node_exporter.group }}"
+    mode: 0700
+    remote_src: yes
+  become: true
+
+- name: Create node exporter text file collector dir
+  file:
+    path: /var/lib/node_exporter/textfile_collector
+    owner: "{{ node_exporter.user }}"
+    group: "{{ node_exporter.group }}"
+    mode: 0744
+    state: directory
+  become: yes
+
+- name: Copy node exporter systemd unit file template
+  template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: "{{ node_exporter.user }}"
+    group: "{{ node_exporter.group }}"
+    mode: 0644
+  become: yes
+  notify: Restart Node Exporter
+
+- name: Copy node exporter systemd config file template
+  template:
+    src: node_exporter.sysconfig.j2
+    dest: /etc/default/node_exporter
+    owner: "{{ node_exporter.user }}"
+    group: "{{ node_exporter.group }}"
+    mode: 0644
+  become: yes
+  notify: Restart Node Exporter

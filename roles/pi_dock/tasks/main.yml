@@ -1,5 +1,10 @@
 ---
 
+#
+# Todo: break this out into multiple roles per sensor / packages / pi setup
+#
+#
+
 - name: Install required packages
   package:
     name: "{{ item }}"
@@ -20,11 +25,11 @@
     line: "{{ item.line }}"
     insertafter: "{{ item.insertafter }}"
     state: "{{ item.state }}"
-    backup: yes
+    backup: no
   with_items:
-          - { dest: '/boot/config.txt', line: "dtoverlay=w1-gpio", insertafter: 'EOF', state: 'present' }
-          - { dest: '/boot/config.txt', line: "dtparam=i2c1=on", insertafter: 'EOF', state: 'present' }
-          - { dest: '/boot/config.txt', line: "dtparam=i2c_arm=on", insertafter: 'EOF', state: 'present' }
+          - { dest: '/boot/firmware/config.txt', line: "dtoverlay=w1-gpio", insertafter: 'EOF', state: 'present' }
+          - { dest: '/boot/firmware/config.txt', line: "dtparam=i2c1=on", insertafter: 'EOF', state: 'present' }
+          - { dest: '/boot/firmware/config.txt', line: "dtparam=i2c_arm=on", insertafter: 'EOF', state: 'present' }
           - { dest: '/etc/modules', line: "i2c-bcm2708", insertafter: 'EOF', state: 'present' }
           - { dest: '/etc/modules', line: "i2c-dev", insertafter: 'EOF', state: 'present' }
   become: true
@@ -69,18 +74,18 @@
     src: "{{ item.src }}" 
     dest: "{{ install_path }}{{ item.dest }}"
     mode: 0744
-    owner: pi
-    group: pi
+    owner: ubuntu
+    group: ubuntu
   with_items:
     - { src: 'range_sensor.py.j2', dest: 'range_sensor.py' }
     - { src: 'pi_dock.sh.j2', dest: 'pi_dock.sh' }
 
-- name: configure cron job
-  cron:
-    name: "poll sensor data"
-    minute: "*/1"
-    state: present
-    job: "{{ install_path }}pi_dock.sh >/dev/null 2>&1"
+#- name: configure cron job
+#  cron:
+#    name: "poll sensor data"
+#    minute: "*/1"
+#    state: present
+#    job: "{{ install_path }}pi_dock.sh >/dev/null 2>&1"
 
   # this is a ansible 2.2 feature
   #- name: enable cron daemon in systemd
@@ -90,6 +95,6 @@
   #  state: started
   #become: true
 
-- name: enable systemd cron the old way
-  shell: systemctl enable cron
-  become: true
+#- name: enable systemd cron the old way
+#  shell: systemctl enable cron
+#  become: true

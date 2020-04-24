@@ -1,0 +1,7 @@
+---
+
+pi_dock_sensors:
+  user: root
+  group: root
+  svc_options: "-d"
+

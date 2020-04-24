@@ -1,5 +1,6 @@
-- hosts: dock-pi
+- hosts: all
   gather_facts: yes
-  user: pi
   roles:
-    - { role : pi_dock }
+    - { role: pi_dock_sensors, tags: "sensors" }
+    - { role: pi_dock }
+    - { role: prom_node_exporter }
