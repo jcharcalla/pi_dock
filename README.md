@@ -4,7 +4,7 @@
 
 **Ansible role for a Raspberry PI based lake level / temperature monitoring project.**
 
-This project is rather specific to my own setup and makes use of various outdated sensors I had from a previous version which was ate by squirrels. The new updates are meant for Ubuntu running on a raspberry pi. The original cron script relying on influxdb is still included, however no longer used. A new version as a systemd service has replaced the old, and this service relies on the Promethus node_exporter collector functionality.
+This project is rather specific to my own setup and makes use of various outdated sensors I had from a previous version which was ate by squirrels. The new updates are meant for Ubuntu running on a raspberry pi. The original cron script relying on influxdb is still included, however no longer used. A new version as a systemd service has replaced the old, and this service relies on the Promethus node_exporter textfile collector functionality.
 
 ### Sensor list:
 - Water Temp - Vktech 3M Waterproof Digital Temperature Temp Sensor Probe DS18b20
@@ -13,6 +13,9 @@ This project is rather specific to my own setup and makes use of various outdate
 - Barometer - SainSmart BMP085 Module Digital Barometric Pressure Sensor
 
 ## Ansible playbook
+
+This playbook will install all required packages and scripts.
+
 
 ```
 $ ansible-playbook -i pi-dock.charcalla.com, pi_dock.yml -k -K -u ubuntu
@@ -23,6 +26,8 @@ PLAY [all] *********************************************************************
 ```
 
 ## pi_dock_sensors.sh usage:
+
+The main script which creates prometheus metrics.
 
 ```
 ###
