@@ -86,6 +86,7 @@ ada2302_sensor () {
 
 range_finder (){
 	DISTANCE_CM=$(${PYTHON_PATH} ${SCRIPTS_PATH}range_sensor.py | grep "Distance:" | cut -d " " -f2)
+	## Add error checking here
 }
 
 bmp085_sensor () {
