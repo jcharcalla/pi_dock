@@ -18,7 +18,7 @@ This playbook will install all required packages and scripts.
 
 
 ```
-$ ansible-playbook -i <Hostname or IP>, pi_dock.yml -k -K -u ubuntu
+$ ansible-playbook -i < Hostname | IP >, pi_dock.yml -k -K -u ubuntu
 SSH password:
 SUDO password[defaults to SSH password]:
 
@@ -42,7 +42,8 @@ The main script which creates prometheus metrics.
 # Options:
 #   -e Elevation, Meters above sea level of ultrasonic range finder. 
 #      Default: 222
-#   -a ADA 2302 GPIO pin. Default: 17
+#   -a ADA 2302 GPIO pin.
+#      Default: 17
 #   -s Sensors update interval. (Sleep durration in main loop) 
 #      Default: 10
 #   -o Prometheus textcollector output. 
