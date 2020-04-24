@@ -36,6 +36,7 @@ ADA_2302_PIN=17
 SENSOR_ELEVATION=222
 OUTPUT_FILE="/var/lib/node_exporter/textfile_collector/dock_pi_sensors.prom"
 SCRIPTS_PATH="/home/ubuntu/pi_dock/"
+W1_TEMP=(0)
 
 while getopts h?e:a:s:o:di: arg ; do
       case $arg in
@@ -71,7 +72,7 @@ do
 	for i in ${W1_SENSOR}
 	do
 	        RAW_TEMP=$(cat /sys/bus/w1/devices/${i}/w1_slave | grep "t=" | cut -d"=" -f2)
-		W1_TEMP+=($(( RAW_TEMP / 1000 )))
+		W1_TEMP+=($(echo "scale=2; ${RAW_TEMP} / 1000" | bc))
 	done
 done
 }
@@ -109,7 +110,6 @@ fi
 echo "Entering main loop."
 while true
 do
-  W1_TEMP=(0)
   unset W1_TEMP
 
   w1_sensor
