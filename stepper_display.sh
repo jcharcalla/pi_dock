@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO:
+# Turn this into a function of sorts.
+
 # half step produces 1024 quaters or 2048 halves or 4096 wholes of 360
 STEP_MODE="half"
 # zero point of scale in meters, lowest level on scale eqaul to what elevation
@@ -44,6 +47,8 @@ else
 	STEPS=$(( ${STEP_POSITION} - ${SCALED_ELEVATION} ))
 fi
 
+# TODO:
+# If the step distance is too short < 4 or 8 then we should not move or update position file.
 echo ${SCALED_ELEVATION} > ${STEP_FILE}
 
 echo  "${CURRENT_LAKE_LEVEL} - ${ZERO_POINT} = ${ABOVE_ZERO} | ${SCALED_ELEVATION}"
