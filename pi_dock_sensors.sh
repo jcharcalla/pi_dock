@@ -106,6 +106,9 @@ then
   echo "Systemd-notify: Ready to report Dock metrics."
 fi
 
+# ensure our output path exists
+mkdir -p $(dirname ${OUTPUT_FILE})
+
 
 # inifinite loop for polling sensors
 echo "Entering main loop."
@@ -113,18 +116,11 @@ while true
 do
   unset W1_TEMP
 
-  w1_sensor
+# The w1_sensor can be read from the node_hwmon_temp_celsius node exporter metric.
+#  w1_sensor
   range_finder
   bmp085_sensor
   ada2302_sensor
-
-  echo "##### $(date) #####" > ${OUTPUT_FILE}
-  echo "dock_a2302_temp{host=\"${HOSTNAME}\",type=\"temp\",unit=\"c\"} ${ADA_2302_TEMP}" >> ${OUTPUT_FILE}
-  echo "dock_a2302_humidity{host=\"${HOSTNAME}\",type=\"humidity\"} ${ADA_2302_HUMID}" >> ${OUTPUT_FILE}
-  echo "dock_bmp085_temp{host=\"${HOSTNAME}\",type=\"temp\",unit=\"c\"} ${BMP085_TEMP}" >> ${OUTPUT_FILE}
-  echo "dock_bmp085_pressure{host=\"${HOSTNAME}\",type=\"pressure\"} ${BMP085_PRESS}" >> ${OUTPUT_FILE}
-  echo "dock_bmp085_altitude{host=\"${HOSTNAME}\",type=\"altitide\",unit=\"m\"} ${BMP085_ALT}" >> ${OUTPUT_FILE}
-  echo "dock_bmp085_slpressure{host=\"${HOSTNAME}\",type=\"pressure\"} ${BMP085_SLPRESS}" >> ${OUTPUT_FILE}
 
   # convert centimeters to meters to subtract from altitude
   DISTANCE_M=$(echo "scale=2; ${DISTANCE_CM} / 100"| bc)
@@ -132,14 +128,28 @@ do
   #LAKE_LEVEL_M=$(echo "${BMP085_ALT} - ${DISTANCE_M}"| bc)
   LAKE_LEVEL_M=$(echo "scale=2; ${SENSOR_ELEVATION} - ${DISTANCE_M}"| bc)
   #LAKE_LEVEL_M=$(( ${SENSOR_ELEVATION} - ${DISTANCE_M} ))
-  echo "dock_lake_level{host=\"${HOSTNAME}\",type=\"altitude\",unit=\"m\"} ${LAKE_LEVEL_M}" >> ${OUTPUT_FILE}
 
-  TEMP_LOOP=0
-  for lake_temp in ${W1_TEMP[@]}
-  do
-  	echo "dock_water_temp{host=\"${HOSTNAME}\",type=\"temp\",unit= \"c\",sensor=\"${TEMP_LOOP}\"} ${W1_TEMP[${TEMP_LOOP}]}" >> ${OUTPUT_FILE}
-	((TEMP_LOOP++))
-  done
+cat <<EOF > ${OUTPUT_FILE}
+##### $(date) #####
+dock_a2302_temp{host="${HOSTNAME}",type="temp",unit="c"} ${ADA_2302_TEMP}
+dock_a2302_humidity{host="${HOSTNAME}",type="humidity"} ${ADA_2302_HUMID}
+dock_bmp085_temp{host="${HOSTNAME}",type="temp",unit="c"} ${BMP085_TEMP}
+dock_bmp085_pressure{host="${HOSTNAME}",type="pressure"} ${BMP085_PRESS}
+dock_bmp085_altitude{host="${HOSTNAME}",type="altitide",unit="m"} ${BMP085_ALT}
+dock_bmp085_slpressure{host="${HOSTNAME}",type="pressure"} ${BMP085_SLPRESS}
+dock_lake_level{host="${HOSTNAME}",type="altitude",unit="m"} ${LAKE_LEVEL_M}
+EOF
+
+#
+# The w1_sensor can be read from the node_hwmon_temp_celsius node exporter metric.
+#
+#  TEMP_LOOP=0
+#  for lake_temp in ${W1_TEMP[@]}
+#  do
+#  	echo "dock_water_temp{host=\"${HOSTNAME}\",type=\"temp\",unit= \"c\",sensor=\"${TEMP_LOOP}\"} ${W1_TEMP[${TEMP_LOOP}]}" >> ${OUTPUT_FILE}
+#	((TEMP_LOOP++))
+#  done
+
   
   sleep ${SLEEP_INTERVAL}
 done

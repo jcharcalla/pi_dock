@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User={{ pi_dock_sensors.user }}
 Type=notify
-PIDFile=/var/run/pi_dock_sensors.pid
+# PIDFile=/var/run/pi_dock_sensors.pid
 EnvironmentFile=-/etc/default/pi_dock_sensors
 ExecStart=/usr/local/bin/pi_dock_sensors.sh $OPTIONS
 
